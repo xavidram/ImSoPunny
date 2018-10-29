@@ -22,9 +22,9 @@ namespace ImSoPunny.Controllers
 
         // GET: api/Tags
         [HttpGet]
-        public IEnumerable<Tag> GetTag()
+        public ActionResult<List<Tag>> GetTag()
         {
-            return _context.Tag;
+            return _context.Tags.ToList();
         }
 
         // GET: api/Tags/5
@@ -36,7 +36,7 @@ namespace ImSoPunny.Controllers
                 return BadRequest(ModelState);
             }
 
-            var tag = await _context.Tag.FindAsync(id);
+            var tag = await _context.Tags.FindAsync(id);
 
             if (tag == null)
             {
@@ -90,7 +90,7 @@ namespace ImSoPunny.Controllers
                 return BadRequest(ModelState);
             }
 
-            _context.Tag.Add(tag);
+            _context.Tags.Add(tag);
             await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetTag", new { id = tag.TagId }, tag);
@@ -105,13 +105,13 @@ namespace ImSoPunny.Controllers
                 return BadRequest(ModelState);
             }
 
-            var tag = await _context.Tag.FindAsync(id);
+            var tag = await _context.Tags.FindAsync(id);
             if (tag == null)
             {
                 return NotFound();
             }
 
-            _context.Tag.Remove(tag);
+            _context.Tags.Remove(tag);
             await _context.SaveChangesAsync();
 
             return Ok(tag);
@@ -119,7 +119,7 @@ namespace ImSoPunny.Controllers
 
         private bool TagExists(int id)
         {
-            return _context.Tag.Any(e => e.TagId == id);
+            return _context.Tags.Any(e => e.TagId == id);
         }
     }
 }

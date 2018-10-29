@@ -24,7 +24,7 @@ namespace ImSoPunny.Controllers
         [HttpGet]
         public IEnumerable<Pun> GetPun()
         {
-            return _context.Pun;
+            return _context.Puns;
         }
 
         // GET: api/Puns/5
@@ -36,7 +36,7 @@ namespace ImSoPunny.Controllers
                 return BadRequest(ModelState);
             }
 
-            var pun = await _context.Pun.FindAsync(id);
+            var pun = await _context.Puns.FindAsync(id);
 
             if (pun == null)
             {
@@ -90,7 +90,7 @@ namespace ImSoPunny.Controllers
                 return BadRequest(ModelState);
             }
 
-            _context.Pun.Add(pun);
+            _context.Puns.Add(pun);
             await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetPun", new { id = pun.PunId }, pun);
@@ -105,13 +105,13 @@ namespace ImSoPunny.Controllers
                 return BadRequest(ModelState);
             }
 
-            var pun = await _context.Pun.FindAsync(id);
+            var pun = await _context.Puns.FindAsync(id);
             if (pun == null)
             {
                 return NotFound();
             }
 
-            _context.Pun.Remove(pun);
+            _context.Puns.Remove(pun);
             await _context.SaveChangesAsync();
 
             return Ok(pun);
@@ -119,7 +119,7 @@ namespace ImSoPunny.Controllers
 
         private bool PunExists(int id)
         {
-            return _context.Pun.Any(e => e.PunId == id);
+            return _context.Puns.Any(e => e.PunId == id);
         }
     }
 }

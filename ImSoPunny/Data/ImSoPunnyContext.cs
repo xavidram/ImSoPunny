@@ -10,9 +10,9 @@ namespace ImSoPunny.Models
         {
         }
 
-        public DbSet<ImSoPunny.Models.Pun> Pun { get; set; }
+        public DbSet<ImSoPunny.Models.Pun> Puns { get; set; }
 
-        public DbSet<ImSoPunny.Models.Tag> Tag { get; set; }
+        public DbSet<ImSoPunny.Models.Tag> Tags { get; set; }
 
 		protected override void OnModelCreating(ModelBuilder builder)
 		{
