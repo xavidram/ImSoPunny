@@ -24,13 +24,13 @@ namespace ImSoPunny.Controllers
         [HttpGet]
         public ActionResult<List<TagDtoReturn>> GetTag()
         {
-			return _context.Tags.Select(x => new TagDtoReturn
-			{
-				TagId = x.TagId,
-				Text = x.Text,
-				Acronym = x.Acronym,
-				Count = x.PunTags.Count
-			}).ToList();
+            return _context.Tags.Select(x => new TagDtoReturn
+            {
+                TagId = x.TagId,
+                Text = x.Text,
+                Acronym = x.Acronym,
+                Count = x.PunTags.Count
+            }).ToList();
         }
 
         // GET: api/Tags/5
@@ -52,41 +52,6 @@ namespace ImSoPunny.Controllers
             return Ok(tag);
         }
 
-        // PUT: api/Tags/5
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutTag([FromRoute] int id, [FromBody] Tag tag)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
-            if (id != tag.TagId)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(tag).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!TagExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
-        }
-
         // POST: api/Tags
         [HttpPost]
         public async Task<IActionResult> PostTag([FromBody] Tag tag)
@@ -100,27 +65,6 @@ namespace ImSoPunny.Controllers
             await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetTag", new { id = tag.TagId }, tag);
-        }
-
-        // DELETE: api/Tags/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteTag([FromRoute] int id)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
-            var tag = await _context.Tags.FindAsync(id);
-            if (tag == null)
-            {
-                return NotFound();
-            }
-
-            _context.Tags.Remove(tag);
-            await _context.SaveChangesAsync();
-
-            return Ok(tag);
         }
 
         private bool TagExists(int id)

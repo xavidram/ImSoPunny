@@ -11,7 +11,6 @@ namespace ImSoPunny.Models
 		{
 			Puns = new HashSet<Pun>();
 		}
-		public string Name { get; set; }
 		public ICollection<Pun> Puns { get; set; }
 	}
 

@@ -2,10 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ImSoPunny.Models;
+
+// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace ImSoPunny.Controllers
 {
@@ -13,113 +14,77 @@ namespace ImSoPunny.Controllers
     [ApiController]
     public class PunsController : ControllerBase
     {
-        private readonly ImSoPunnyContext _context;
+        private readonly ImSoPunnyContext _db;
 
         public PunsController(ImSoPunnyContext context)
         {
-            _context = context;
+            _db = context;
         }
 
-        // GET: api/Puns
-        [HttpGet]
-        public IEnumerable<Pun> GetPun()
-        {
-            return _context.Puns;
-        }
-
-        // GET: api/Puns/5
+        // api/puns/5
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetPun([FromRoute] int id)
+        public async Task<ActionResult<PunDtoReturn>> Get(int id)
         {
             if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
-            var pun = await _context.Puns.FindAsync(id);
-
-            if (pun == null)
-            {
-                return NotFound();
-            }
-
-            return Ok(pun);
-        }
-
-        // PUT: api/Puns/5
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutPun([FromRoute] int id, [FromBody] Pun pun)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
-            if (id != pun.PunId)
             {
                 return BadRequest();
             }
-
-            _context.Entry(pun).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!PunExists(id))
+            try {
+                var Pun = await _db.Puns
+                .Where(p => p.PunId == id)
+                .Include(pt => pt.PunTags)
+                .ThenInclude(tags => tags.Tag)
+                .Select(p => new PunDtoReturn
+                {
+                    PunId = p.PunId,
+                    Text = p.Text,
+                    Score = p.Score,
+                    User = p.User,
+                    Tags = p.PunTags.Select(t => t.Tag.Text)
+                }).FirstAsync();
+                if (Pun == null)
                 {
                     return NotFound();
                 }
-                else
+                return Ok(Pun);
+            } catch( Exception e) {
+                return BadRequest(e);
+            }
+
+        }
+
+        // api/puns/sample
+        [HttpGet("sample")]
+        public async Task<ActionResult<PunDtoReturn>> Sample() {
+            var count = await _db.Puns.CountAsync();
+            Random rnd = new Random();
+            var id = rnd.Next(1, count);
+            return await Get(id);
+        }
+
+        // api/puns/filter/term
+        [HttpGet("filter/{term}")]
+        public async Task<ActionResult<List<Pun>>> Filter(string term) {
+            if(!ModelState.IsValid) {
+                return BadRequest();
+            }
+            var Puns = await _db.Puns
+                .Where(x => x.PunTags.Any(t => t.Tag.Acronym == term))
+                .Include(pt => pt.PunTags)
+                .ThenInclude(tags => tags.Tag)
+                .Select(p => new PunDtoReturn
                 {
-                    throw;
-                }
+                    PunId = p.PunId,
+                    Text = p.Text,
+                    Score = p.Score,
+                    User = p.User,
+                    Tags = p.PunTags.Select(t => t.Tag.Text)
+                })
+                .ToListAsync();
+            if(Puns == null) {
+                return NoContent(); // No items found by term
             }
-
-            return NoContent();
-        }
-
-        // POST: api/Puns
-        [HttpPost]
-        public async Task<IActionResult> PostPun([FromBody] Pun pun)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
-            _context.Puns.Add(pun);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetPun", new { id = pun.PunId }, pun);
-        }
-
-        // DELETE: api/Puns/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeletePun([FromRoute] int id)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
-            var pun = await _context.Puns.FindAsync(id);
-            if (pun == null)
-            {
-                return NotFound();
-            }
-
-            _context.Puns.Remove(pun);
-            await _context.SaveChangesAsync();
-
-            return Ok(pun);
-        }
-
-        private bool PunExists(int id)
-        {
-            return _context.Puns.Any(e => e.PunId == id);
+            return Ok(Puns);
         }
     }
 }
