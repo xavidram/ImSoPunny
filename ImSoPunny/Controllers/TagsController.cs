@@ -22,9 +22,15 @@ namespace ImSoPunny.Controllers
 
         // GET: api/Tags
         [HttpGet]
-        public ActionResult<List<Tag>> GetTag()
+        public ActionResult<List<TagDtoReturn>> GetTag()
         {
-            return _context.Tags.ToList();
+			return _context.Tags.Select(x => new TagDtoReturn
+			{
+				TagId = x.TagId,
+				Text = x.Text,
+				Acronym = x.Acronym,
+				Count = x.PunTags.Count
+			}).ToList();
         }
 
         // GET: api/Tags/5
