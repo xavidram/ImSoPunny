@@ -86,5 +86,41 @@ namespace ImSoPunny.Controllers
             }
             return Ok(Puns);
         }
+
+        // api/puns/create
+        [HttpPost("create")]
+        public async Task<ActionResult<Pun>> Create([FromBody] PunDto NewPun)
+        {
+            if (ModelState.IsValid)
+            {
+                var Pun = new Pun { Text = NewPun.Text, Score = 0 };
+                // Add the Pun to recieve its ID
+                await _db.AddAsync(Pun);
+                // Find the User first
+                var User = await _db.Users.FirstOrDefaultAsync(u => u.Id == NewPun.UserId);
+                if (User != null)
+                {
+                    Pun.UserId = NewPun.UserId;
+                    // Pun.User = User; ToDo: Fix this
+                }
+                // Find the Tags
+                foreach (var tag in NewPun.Tags)
+                {
+                    var t = _db.Tags.FirstOrDefault(tg => tg.Text == tag);
+                    if (t != null)
+                    {
+                        var pt = new PunTag { PunId = Pun.PunId, Pun = Pun, TagId = t.TagId, Tag = t };
+                        t.PunTags.Add(pt);
+                        Pun.PunTags.Add(pt);
+                    }
+                }
+                // Once we finish, let's save
+                await _db.SaveChangesAsync();
+                return CreatedAtAction(nameof(Get), new { Id = Pun.PunId }, Pun);
+            }
+            return BadRequest("Check Sent Data!");
+        }
+
+
     }
 }
